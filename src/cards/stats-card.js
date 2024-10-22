@@ -360,7 +360,7 @@ const renderStatsCard = (stats, options = {}) => {
 
   // the lower the user's percentile the better
   // const progress = 100 - rank.percentile;
-  const progress = (validity_days / 100 * days_left) || 0
+  const progress = (days_left / validity_days * 100) || 0
   const cssStyles = getStyles({
     titleColor,
     ringColor,

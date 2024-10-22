@@ -332,17 +332,6 @@ const fetchStats = async (
       return prev + curr.stargazers.totalCount;
     }, 0);
 
-  stats.rank = calculateRank({
-    all_commits: include_all_commits,
-    commits: stats.totalCommits,
-    prs: stats.totalPRs,
-    reviews: stats.totalReviews,
-    issues: stats.totalIssues,
-    repos: user.repositories.totalCount,
-    stars: stats.totalStars,
-    followers: user.followers.totalCount,
-  });
-
   return stats;
 };
 

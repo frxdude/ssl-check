@@ -1,4 +1,5 @@
 // @ts-check
+import calculateRank from "../calculateRank.js";
 import { Card } from "../common/Card.js";
 import { I18n } from "../common/I18n.js";
 import { icons, rankIcon } from "../common/icons.js";
@@ -360,10 +361,12 @@ const renderStatsCard = (stats, options = {}) => {
 
   // the lower the user's percentile the better
   // const progress = 100 - rank.percentile;
-  const progress = (days_left / validity_days * 100) || 0
+  const progress = 100 - (days_left / validity_days * 100) || 0
+  const calculated = calculateRank({percentile: progress});
+
   const cssStyles = getStyles({
     titleColor,
-    ringColor,
+    ringColor: calculated.color,
     textColor,
     iconColor,
     show_icons,

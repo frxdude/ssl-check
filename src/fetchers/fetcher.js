@@ -205,7 +205,6 @@ const totalCommitsFetcher = async (username) => {
 };
 
 const fetchSSLInfo = async (webUrl) => {
-    console.log("https://ssl-checker.io/api/v1/check/${webUrl}", `https://ssl-checker.io/api/v1/check/${webUrl}`)
     let res;
     try {
       res = await axios({

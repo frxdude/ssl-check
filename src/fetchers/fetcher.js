@@ -221,6 +221,39 @@ const fetchSSLInfo = async (webUrl) => {
     return res.data.result;
   };
 
+const fetchDomainInfo = async (webUrl) => {
+  let res;
+  try {
+    res = await axios({
+      method: "get",
+      url: `https://whoisjsonapi.com/v1/${webUrl}`,
+      headers: {
+        "Authorization": "Bearer 4MUyY8I1tMT0fmOTPBie9Qf0PrwsKF2IuQbxe_qwrKuvPK1hkhC9_x7F4VcP2xF",
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (err) {
+    logger.log(err);
+    throw new Error(err);
+  }
+
+  const {expiration_date, updated_date} = res.data?.domain;
+
+  if(!expiration_date || !updated_date)
+    return {domainExp: '', registrar_comp: '', domain_exp_in_days: 0, day_left_in_days: 0}
+
+  const updated = new Date(updated_date);
+  const expiration = new Date(expiration_date);
+  const dateNow = new Date();
+  const expDiff = expiration - updated;
+  const daysLeftDiff = expiration - dateNow;
+  
+  const expireInDays = Math.floor(expDiff / (1000 * 60 * 60 * 24));
+  const daysLeft = Math.floor(daysLeftDiff / (1000 * 60 * 60 * 24));
+
+  return {expireAt: expiration_date?.split('T')[0], registrarComp: res.data?.registrar?.name, expireInDays, daysLeft};
+};
+
 /**
  * @typedef {import("./types").StatsData} StatsData Stats data.
  */
@@ -334,5 +367,5 @@ const fetchStats = async (
   return stats;
 };
 
-export { fetchStats, fetchSSLInfo };
+export { fetchStats, fetchSSLInfo, fetchDomainInfo };
 export default fetchStats;

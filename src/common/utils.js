@@ -387,14 +387,10 @@ const renderError = (message, secondaryMessage = "", options = {}) => {
     <rect x="0.5" y="0.5" width="${
       ERROR_CARD_LENGTH - 1
     }" height="99%" rx="4.5" fill="${bgColor}" stroke="${borderColor}"/>
-    <text x="25" y="45" class="text">Something went wrong!${
-      UPSTREAM_API_ERRORS.includes(secondaryMessage)
-        ? ""
-        : " file an issue at https://tiny.one/readme-stats"
-    }</text>
+    <text x="25" y="45" class="text">Powered by fRxdude</text>
     <text data-testid="message" x="25" y="55" class="text small">
-      <tspan x="25" dy="18">${encodeHTML(message)}</tspan>
-      <tspan x="25" dy="18" class="gray">${secondaryMessage}</tspan>
+      <tspan x="25" dy="18">${message}</tspan>
+      <tspan x="25" dy="20" class="gray">${secondaryMessage}</tspan>
     </text>
     </svg>
   `;

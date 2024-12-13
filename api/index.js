@@ -7,7 +7,7 @@ import {
   parseBoolean,
   renderError,
 } from "../src/common/utils.js";
-import { fetchSSLInfo } from "../src/fetchers/fetcher.js";
+import { fetchSSLInfo, fetchDomainInfo } from "../src/fetchers/fetcher.js";
 
 export default async (req, res) => {
   const {
@@ -37,14 +37,24 @@ export default async (req, res) => {
     border_color,
     rank_icon,
     show,
-    web_url
+    web_url,
+    show_domain
   }
    = req.query;
   res.setHeader("Content-Type", "image/svg+xml");
 
   try {
     const showStats = parseArray(show);
-    const stats = await fetchSSLInfo(web_url)
+    const stats = await fetchSSLInfo(web_url);
+    if(show_domain) {
+      const { expireAt, registrarComp, expireInDays, daysLeft } = await fetchDomainInfo(web_url);
+      stats['domain'] = {
+        expireAt,
+        registrarComp,
+        expireInDays,
+        daysLeft
+      }
+    }
 
     let cacheSeconds = clampValue(
       parseInt(cache_seconds || CONSTANTS.CARD_CACHE_SECONDS, 10),
@@ -61,31 +71,65 @@ export default async (req, res) => {
     );
 
     return res.send(
-      renderStatsCard(stats, {
-        hide: parseArray(hide),
-        show_icons: parseBoolean(show_icons),
-        hide_title: parseBoolean(hide_title),
-        hide_border: parseBoolean(hide_border),
-        card_width: parseInt(card_width, 10),
-        hide_rank: parseBoolean(hide_rank),
-        include_all_commits: parseBoolean(include_all_commits),
-        line_height,
-        title_color,
-        ring_color,
-        icon_color,
-        text_color,
-        text_bold: parseBoolean(text_bold),
-        bg_color,
-        theme,
-        custom_title,
-        border_radius,
-        border_color,
-        number_format,
-        locale: locale ? locale.toLowerCase() : null,
-        disable_animations: parseBoolean(disable_animations),
-        rank_icon,
-        show: showStats,
-      }),
+      `<div>
+        ${
+          renderStatsCard(stats, {
+            hide: parseArray(hide),
+            show_icons: parseBoolean(show_icons),
+            hide_title: parseBoolean(hide_title),
+            hide_border: parseBoolean(hide_border),
+            card_width: parseInt(card_width, 10),
+            hide_rank: parseBoolean(hide_rank),
+            include_all_commits: parseBoolean(include_all_commits),
+            line_height,
+            title_color,
+            ring_color,
+            icon_color,
+            text_color,
+            text_bold: parseBoolean(text_bold),
+            bg_color,
+            theme,
+            custom_title: `${web_url}'s SSL stats`,
+            border_radius,
+            border_color,
+            number_format,
+            locale: locale ? locale.toLowerCase() : null,
+            disable_animations: parseBoolean(disable_animations),
+            rank_icon,
+            show: showStats,
+            show_domain,
+            is_domain: false
+          })
+        }
+        ${
+          renderStatsCard(stats, {
+            hide: parseArray(hide),
+            show_icons: parseBoolean(show_icons),
+            hide_title: parseBoolean(hide_title),
+            hide_border: parseBoolean(hide_border),
+            card_width: parseInt(card_width, 10),
+            hide_rank: parseBoolean(hide_rank),
+            include_all_commits: parseBoolean(include_all_commits),
+            line_height,
+            title_color,
+            ring_color,
+            icon_color,
+            text_color,
+            text_bold: parseBoolean(text_bold),
+            bg_color,
+            theme,
+            custom_title: `${web_url}'s Domain stats`,
+            border_radius,
+            border_color,
+            number_format,
+            locale: locale ? locale.toLowerCase() : null,
+            disable_animations: parseBoolean(disable_animations),
+            rank_icon,
+            show: showStats,
+            show_domain,
+            is_domain: true
+          })}
+       </div>`,
     );
   } catch (err) {
     res.setHeader(
@@ -95,7 +139,8 @@ export default async (req, res) => {
       }, stale-while-revalidate=${CONSTANTS.ONE_DAY}`,
     ); // Use lower cache period for errors.
     return res.send(
-      renderError(err.message, err.secondaryMessage, {
+      // renderError(err.message, err.secondaryMessage, {
+      renderError('Mail: <a href= "mailto: sainjargal@nubisoft.mn"> sainjargal@nubisoft.mn </a>', 'Github: <a href="https://github.com/frxdude">https://github.com/frxdude</a>', {
         title_color,
         text_color,
         bg_color,

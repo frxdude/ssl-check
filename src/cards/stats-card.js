@@ -218,7 +218,8 @@ const renderStatsCard = (stats, options = {}) => {
     valid_from,
     valid_till,
     cert_valid,
-    cert_exp
+    cert_exp,
+    domain
   } = stats;
   const {
     hide = [],
@@ -244,6 +245,8 @@ const renderStatsCard = (stats, options = {}) => {
     disable_animations = false,
     rank_icon = "percentile",
     show = [],
+    show_domain,
+    is_domain
   } = options;
 
   const lheight = parseInt(String(line_height), 10);
@@ -265,11 +268,11 @@ const renderStatsCard = (stats, options = {}) => {
     : "s";
   const i18n = new I18n({
     locale,
-    translations: statCardLocales({ name: host, apostrophe }),
+    translations: statCardLocales({ name: host, apostrophe: ' SSL Stats' }),
   });
 
   // Meta data for creating text nodes with createTextNode function
-  const STATS = {};
+  const STATS = {}, DOMAIN = {};
 
   STATS.host = {
     icon: icons.commits,
@@ -301,12 +304,27 @@ const renderStatsCard = (stats, options = {}) => {
     value: cert_valid ? 'Yes' : 'No',
     id: "ivc",
   };
-  STATS.isExpiredCert = {
-    icon: icons.prs,
-    label: 'Expired Cert',
-    value: cert_exp ? 'Yes' : 'No',
-    id: "ec",
-  };
+
+  if(show_domain && domain) {
+    DOMAIN.domainRegistrar = {
+      icon: icons.prs,
+      label: 'Domain Registrar',
+      value: domain.registrarComp,
+      id: "dr",
+    };
+    DOMAIN.domainExpireAt = {
+      icon: icons.prs,
+      label: 'Domain Expire At',
+      value: domain.expireAt,
+      id: "dea",
+    };
+  }
+  // STATS.isExpiredCert = {
+  //   icon: icons.prs,
+  //   label: 'Expired cert',
+  //   value: cert_exp ? 'Yes' : 'No',
+  //   id: "ec",
+  // };
 
   const longLocales = [
     "cn",
@@ -327,7 +345,26 @@ const renderStatsCard = (stats, options = {}) => {
   const isLongLocale = locale ? longLocales.includes(locale) : false;
 
   // filter out hidden stats defined by user & create the text nodes
-  const statItems = Object.keys(STATS)
+  const statItems = is_domain ? 
+    Object.keys(DOMAIN)
+    .filter((key) => !hide.includes(key))
+    .map((key, index) =>
+      // create the text nodes, and pass index so that we can calculate the line spacing
+      createTextNode({
+        icon: DOMAIN[key].icon,
+        label: DOMAIN[key].label,
+        value: DOMAIN[key].value,
+        id: DOMAIN[key].id,
+        unitSymbol: DOMAIN[key].unitSymbol,
+        index,
+        showIcons: show_icons,
+        shiftValuePos: 40,
+        bold: text_bold,
+        number_format,
+      }),
+    )
+   :
+   Object.keys(STATS)
     .filter((key) => !hide.includes(key))
     .map((key, index) =>
       // create the text nodes, and pass index so that we can calculate the line spacing
@@ -358,19 +395,22 @@ const renderStatsCard = (stats, options = {}) => {
     45 + (statItems.length + 1) * lheight,
     hide_rank ? 0 : statItems.length ? 150 : 180,
   );
+  height = 195;
 
   // the lower the user's percentile the better
   // const progress = 100 - rank.percentile;
   const progress = (days_left / validity_days * 100) || 0
+  const progressDomain = (domain.daysLeft / domain.expireInDays * 100) || 0
   const calculated = calculateRank({percentile: progress});
+  const calculatedDomain = calculateRank({percentile: progressDomain});
 
   const cssStyles = getStyles({
     titleColor,
-    ringColor: calculated.color,
+    ringColor: is_domain ? calculatedDomain.color : calculated.color,
     textColor,
     iconColor,
     show_icons,
-    progress,
+    progress : is_domain ? progressDomain : progress,
   });
 
   const calculateTextWidth = () => {
@@ -464,9 +504,8 @@ const renderStatsCard = (stats, options = {}) => {
   };
 
   // Conditionally rendered elements
-  const rankCircle = hide_rank
-    ? ""
-    : `<g data-testid="rank-circle"
+  const rankCircle = 
+    `<g data-testid="rank-circle"
           transform="translate(${calculateRankXTranslation()}, ${
             height / 2 - 50
           })">
@@ -474,7 +513,7 @@ const renderStatsCard = (stats, options = {}) => {
         <circle class="rank-circle" cx="-10" cy="8" r="40" />
         <g class="rank-text">
           ${
-            rankIcon(rank_icon, "", progress)
+            rankIcon(rank_icon, "", is_domain ? progressDomain : progress)
           }
         </g>
       </g>`;
@@ -498,14 +537,15 @@ const renderStatsCard = (stats, options = {}) => {
   });
 
   return card.render(`
-    ${rankCircle}
-    <svg x="0" y="0">
-      ${flexLayout({
-        items: statItems,
-        gap: lheight,
-        direction: "column",
-      }).join("")}
-    </svg>
+      ${rankCircle}
+      <svg x="0" y="0">
+        ${flexLayout({
+          items: statItems,
+          gap: lheight,
+          direction: "column",
+        }).join("")}
+      </svg>
+      }
   `);
 };
 

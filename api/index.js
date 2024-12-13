@@ -46,7 +46,7 @@ export default async (req, res) => {
   try {
     const showStats = parseArray(show);
     const stats = await fetchSSLInfo(web_url);
-    if(show_domain) {
+    if(show_domain != undefined && show_domain !== 'false') {
       const { expireAt, registrarComp, expireInDays, daysLeft } = await fetchDomainInfo(web_url);
       stats['domain'] = {
         expireAt,
@@ -102,6 +102,7 @@ export default async (req, res) => {
           })
         }
         ${
+          show_domain !== 'false' ?
           renderStatsCard(stats, {
             hide: parseArray(hide),
             show_icons: parseBoolean(show_icons),
@@ -128,7 +129,7 @@ export default async (req, res) => {
             show: showStats,
             show_domain,
             is_domain: true
-          })}
+          }): ''}
        </div>`,
     );
   } catch (err) {

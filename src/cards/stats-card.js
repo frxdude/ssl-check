@@ -400,7 +400,7 @@ const renderStatsCard = (stats, options = {}) => {
   // the lower the user's percentile the better
   // const progress = 100 - rank.percentile;
   const progress = (days_left / validity_days * 100) || 0
-  const progressDomain = (domain.daysLeft / domain.expireInDays * 100) || 0
+  const progressDomain = is_domain ? (domain?.daysLeft / domain?.expireInDays * 100) : 0
   const calculated = calculateRank({percentile: progress});
   const calculatedDomain = calculateRank({percentile: progressDomain});
 

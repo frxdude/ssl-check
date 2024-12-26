@@ -38,7 +38,7 @@ export default async (req, res) => {
     rank_icon,
     show,
     web_url,
-    show_domain
+    show_domain = true
   }
    = req.query;
   res.setHeader("Content-Type", "image/svg+xml");

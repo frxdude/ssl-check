@@ -38,7 +38,7 @@ export default async (req, res) => {
     rank_icon,
     show,
     web_url,
-    show_domain = true
+    show_domain=false
   }
    = req.query;
   res.setHeader("Content-Type", "image/svg+xml");
@@ -69,68 +69,64 @@ export default async (req, res) => {
       "Cache-Control",
       `max-age=${cacheSeconds}, s-maxage=${cacheSeconds}, stale-while-revalidate=${CONSTANTS.ONE_DAY}`,
     );
-
     return res.send(
-      `<div>
-        ${
-          renderStatsCard(stats, {
-            hide: parseArray(hide),
-            show_icons: parseBoolean(show_icons),
-            hide_title: parseBoolean(hide_title),
-            hide_border: parseBoolean(hide_border),
-            card_width: parseInt(card_width, 10),
-            hide_rank: parseBoolean(hide_rank),
-            include_all_commits: parseBoolean(include_all_commits),
-            line_height,
-            title_color,
-            ring_color,
-            icon_color,
-            text_color,
-            text_bold: parseBoolean(text_bold),
-            bg_color,
-            theme,
-            custom_title: `${web_url}'s SSL stats`,
-            border_radius,
-            border_color,
-            number_format,
-            locale: locale ? locale.toLowerCase() : null,
-            disable_animations: parseBoolean(disable_animations),
-            rank_icon,
-            show: showStats,
-            show_domain,
-            is_domain: false
-          })
-        }
-        ${
-          show_domain !== 'false' ?
-          renderStatsCard(stats, {
-            hide: parseArray(hide),
-            show_icons: parseBoolean(show_icons),
-            hide_title: parseBoolean(hide_title),
-            hide_border: parseBoolean(hide_border),
-            card_width: parseInt(card_width, 10),
-            hide_rank: parseBoolean(hide_rank),
-            include_all_commits: parseBoolean(include_all_commits),
-            line_height,
-            title_color,
-            ring_color,
-            icon_color,
-            text_color,
-            text_bold: parseBoolean(text_bold),
-            bg_color,
-            theme,
-            custom_title: `${web_url}'s Domain stats`,
-            border_radius,
-            border_color,
-            number_format,
-            locale: locale ? locale.toLowerCase() : null,
-            disable_animations: parseBoolean(disable_animations),
-            rank_icon,
-            show: showStats,
-            show_domain,
-            is_domain: true
-          }): ''}
-       </div>`,
+      `${
+        show_domain !== 'false'
+          ? renderStatsCard(stats, {
+              hide: parseArray(hide),
+              show_icons: parseBoolean(show_icons),
+              hide_title: parseBoolean(hide_title),
+              hide_border: parseBoolean(hide_border),
+              card_width: parseInt(card_width, 10),
+              hide_rank: parseBoolean(hide_rank),
+              include_all_commits: parseBoolean(include_all_commits),
+              line_height,
+              title_color,
+              ring_color,
+              icon_color,
+              text_color,
+              text_bold: parseBoolean(text_bold),
+              bg_color,
+              theme,
+              custom_title: `${web_url}'s Domain stats`,
+              border_radius,
+              border_color,
+              number_format,
+              locale: locale ? locale.toLowerCase() : null,
+              disable_animations: parseBoolean(disable_animations),
+              rank_icon,
+              show: showStats,
+              show_domain,
+              is_domain: true,
+            })
+          : renderStatsCard(stats, {
+              hide: parseArray(hide),
+              show_icons: parseBoolean(show_icons),
+              hide_title: parseBoolean(hide_title),
+              hide_border: parseBoolean(hide_border),
+              card_width: parseInt(card_width, 10),
+              hide_rank: parseBoolean(hide_rank),
+              include_all_commits: parseBoolean(include_all_commits),
+              line_height,
+              title_color,
+              ring_color,
+              icon_color,
+              text_color,
+              text_bold: parseBoolean(text_bold),
+              bg_color,
+              theme,
+              custom_title: `${web_url}'s SSL stats`,
+              border_radius,
+              border_color,
+              number_format,
+              locale: locale ? locale.toLowerCase() : null,
+              disable_animations: parseBoolean(disable_animations),
+              rank_icon,
+              show: showStats,
+              show_domain,
+              is_domain: false,
+            })
+      }`
     );
   } catch (err) {
     res.setHeader(
